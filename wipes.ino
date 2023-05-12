@@ -184,8 +184,8 @@ void chaseCol() {
       } else {
         rightInt = 256 - ((step - 192) * 4);
       }
-      setRoofCol(0, leftInt, leftInt>>1, 0);
-      setRoofCol(1, rightInt, rightInt>>1, 0);
+      setRoofCol(0, leftInt, leftInt>>2, 0);
+      setRoofCol(1, rightInt, rightInt>>2, 0);
     }
 }
 
@@ -195,18 +195,16 @@ void chaseCol() {
 // chaseCol - toggle left and right col, fade
 
 void chaseRow() {
-    uint32_t g_slow = 5;
+    //for (uint8_t i=72; i< 128;i+=6) {
+    //  dmx_master.setChannelValue(i, 255);
+    //  dmx_master.setChannelValue(i+1, 255);
+    //}return;
 
     static uint8_t step;
     static uint8_t row;
     static uint8_t brig;
 
-    static unsigned long last;
-    unsigned long now = micros();
-    unsigned long diff = now - last;
-    bool next = diff > (g_slow * 100);
-    if(next)
-      last = now;
+    bool next = true;//diff > (g_slow * 10);
 
     switch (step)
     {
@@ -214,26 +212,36 @@ void chaseRow() {
       if(brig>200) {
         step++;
         brig = 0;
-      }
-      if(next)
-        brig++;
-        setRoofRow(row, brig, 0, 0);
-      break;
-    case 1:
-      if(next)
-        brig++;//delay only, dont set value
-      if(brig==200)
-        step++;
-      break;
-    case 2:
-      if(brig==0) {
-        step = 0;
-        row = row==3? 0 : row++;
         return;
       }
       if(next)
-        brig--;
+      {
+        brig+=g_fast;
         setRoofRow(row, brig, 0, 0);
+      }
+      break;
+    case 1:
+      if(next)
+        brig+=g_fast;//delay only, dont set value
+      if(brig>=200) {
+        step++;
+      }
+      break;
+    case 2:
+      if(brig<24) {
+        step = 0;
+        setRoofRow(row, 0, 0, 0);
+        if (row==4)
+          row=0;
+        else
+          row++;
+        return;
+      }
+      if(next)
+      {
+       brig-=g_fast;;
+        setRoofRow(row, brig, 0, 0);
+      } 
       break;
     default:
       break;

@@ -20,7 +20,7 @@ SoftwareSerial ser(RX_PIN, TXO_PIN);
 int brightness = 10;
 int dim = 10;
 int fadeAmount = 5;
-
+uint8_t g_fast = 10;
 unsigned step = 5;  // interval at which to blink (milliseconds)
 
 void setup() {
@@ -32,20 +32,22 @@ void setup() {
 
 }
 
-
+//ledhinten addr 68
 
 
 // FILE ledPar.cpp
 
-#define NUM_ROWS 4
+#define NUM_ROWS 5
 #define NUM_COLS 2
 
 void setRoofSpot(uint8_t col, uint8_t row, uint8_t red, uint8_t grn, uint8_t blu)
 {
     uint8_t rowAdd = col==0 ? row * 6 : (3-row) * 6;
-    dmx_master.setChannelValue(col * 24 + rowAdd + 1, red);
-    dmx_master.setChannelValue(col * 24 + rowAdd + 2, grn);
-    dmx_master.setChannelValue(col * 24 + rowAdd + 3, blu);
+    uint8_t addr = col * 24 + rowAdd;
+    if(row==4) addr = 71;
+    dmx_master.setChannelValue(addr + 1, red);
+    dmx_master.setChannelValue(addr + 2, grn);
+    dmx_master.setChannelValue(addr + 3, blu);
 }
 
 // col = left right, 0 = window, 1 = bar
@@ -183,6 +185,7 @@ void buttonPress(char c) {
       //step = 1;
       break;
     case '2':
+      fogLvl = 0;
       dmx_master.setChannelValue(64, 0);
       break;
     case '3':
@@ -195,20 +198,26 @@ void buttonPress(char c) {
         dim += 5;
       }
       break;
-    case '5': //arrowLeft
+    case '5': //arrowLTop
       if (step < 24) {
         step++;
       }
+    if (g_fast < 24) {
+        g_fast++;
+      }
       break;
-    case '6': //arrowRight
+    case '6': //arrowDown
       if (step > 1) {
         step--;
       }
+    if (g_fast > 1) {
+        g_fast--;
+      }
       break;
-    case '8':  //up
+    case '8':  //arrowRight
       animModeUp();
       break;
-    case '7':  //down
+    case '7':  //arrowLeft
       animModeDown();
       break;
   }
