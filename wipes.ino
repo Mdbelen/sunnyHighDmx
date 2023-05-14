@@ -249,4 +249,15 @@ void chaseRow() {
 
 }
 
+void auto1() {
+  setRoof(0,0,0, 100, 10, 10);
+}
+void auto2() {
+  setRoof(0,0,0, 10, 100, 10);
+}
+void auto3() {
+  setRoofRow(0, 0,0,0, 20, 20, 200);
+  setRoofRow(3, 0,0,0, 20, 20, 100);
+  setRoofRow(4, 0,0,0, 10, 10, 200);
+}
 

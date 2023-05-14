@@ -183,6 +183,15 @@ void loop(void) {
     case 6:
       chaseRow();
       break;
+    case 7:
+      auto1();
+      break;
+    case 8:
+      auto2();
+      break;
+    case 9:
+      auto3();
+      break;
   }
 }
 
@@ -255,7 +264,7 @@ void buttonPress(char c) {
 
 void animModeUp() {
   setRoof(0, 0, 0, 0, 0, 0);
-  if (animMode < 6) {
+  if (animMode < 9) {
     animMode++;
   } else {
     animMode = 0;
