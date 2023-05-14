@@ -49,12 +49,30 @@ void setRoofSpot(uint8_t col, uint8_t row, uint8_t red, uint8_t grn, uint8_t blu
     dmx_master.setChannelValue(addr + 2, grn);
     dmx_master.setChannelValue(addr + 3, blu);
 }
+void setRoofSpot(uint8_t col, uint8_t row, uint8_t red, uint8_t grn, uint8_t blu, uint8_t a1, uint8_t a2, uint8_t a3)
+{
+    uint8_t rowAdd = col==0 ? row * 6 : (3-row) * 6;
+    uint8_t addr = col * 24 + rowAdd;
+    if(row==4) addr = 71;
+    dmx_master.setChannelValue(addr + 1, red);
+    dmx_master.setChannelValue(addr + 2, grn);
+    dmx_master.setChannelValue(addr + 3, blu);
+    dmx_master.setChannelValue(addr + 4, a1);
+    dmx_master.setChannelValue(addr + 5, a2);
+    dmx_master.setChannelValue(addr + 6, a3);
+}
 
 // col = left right, 0 = window, 1 = bar
 void setRoofCol(uint8_t col, uint8_t red, uint8_t grn, uint8_t blu) {
   for (uint8_t row = 0; row < NUM_ROWS; row++)
   {
     setRoofSpot(col, row, red, grn, blu);
+  }
+}
+void setRoofCol(uint8_t col, uint8_t red, uint8_t grn, uint8_t blu, uint8_t a1, uint8_t a2, uint8_t a3) {
+  for (uint8_t row = 0; row < NUM_ROWS; row++)
+  {
+    setRoofSpot(col, row, red, grn, blu, a1, a2, a3);
   }
 }
 
@@ -65,11 +83,23 @@ void setRoofRow(uint8_t row, uint8_t red, uint8_t grn, uint8_t blu) {
     setRoofSpot(col, row, red, grn, blu);
   }
 }
+void setRoofRow(uint8_t row, uint8_t red, uint8_t grn, uint8_t blu, uint8_t a1, uint8_t a2, uint8_t a3) {
+  for (uint8_t col = 0; col < NUM_COLS; col++)
+  {
+    setRoofSpot(col, row, red, grn, blu, a1, a2, a3);
+  }
+}
 
 void setRoof(uint8_t red, uint8_t grn, uint8_t blu) {
   for (uint8_t col = 0; col < NUM_COLS; col++)
   {
     setRoofCol(col, red, grn, blu);
+  }
+}
+void setRoof(uint8_t red, uint8_t grn, uint8_t blu, uint8_t a1, uint8_t a2, uint8_t a3) {
+  for (uint8_t col = 0; col < NUM_COLS; col++)
+  {
+    setRoofCol(col, red, grn, blu, a1, a2, a3);
   }
 }
 
@@ -224,7 +254,7 @@ void buttonPress(char c) {
 }
 
 void animModeUp() {
-  setRoof(0, 0, 0);
+  setRoof(0, 0, 0, 0, 0, 0);
   if (animMode < 6) {
     animMode++;
   } else {
@@ -233,7 +263,7 @@ void animModeUp() {
 }
 
 void animModeDown() {
-  setRoof(0, 0, 0);
+  setRoof(0, 0, 0, 0, 0, 0);
   if (animMode > 0) {
     animMode--;
   }
