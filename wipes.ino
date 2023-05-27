@@ -241,7 +241,7 @@ void chaseRow() {
       {
        brig-=g_fast;;
         setRoofRow(row, brig, 0, 0);
-      } 
+      }
       break;
     default:
       break;

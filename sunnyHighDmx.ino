@@ -145,7 +145,7 @@ void loop(void) {
         ;  // Yes, wait for command byte
       switch (c) {
         case 'B':  // Button (Control Pad)
-          if (readAndCheckCRC(255 - '!' - 'B', buf, 2) & (buf[1] == '1')) {
+          if (readAndCheckCRC(255 - '!' - 'B', buf, 2) && (buf[1] == '1')) {
             buttonPress(buf[0]);  // Handle button-press message
           }
           break;
