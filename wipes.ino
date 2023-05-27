@@ -12,28 +12,12 @@ int maxPixel = 24;
 // FULLON - all LEDs only, dimmable
 
 void fullon() {
-  dmx_master.setChannelValue(1, dim);
-  dmx_master.setChannelValue(7, dim);
-  dmx_master.setChannelValue(13, dim);
-  dmx_master.setChannelValue(19, dim);
-  dmx_master.setChannelValue(25, dim);
-  dmx_master.setChannelValue(31, dim);
-  dmx_master.setChannelValue(37, dim);
-  dmx_master.setChannelValue(43, dim);
+  setRoof(g_color[0] >> g_dim, g_color[1] >> g_dim, g_color[2] >> g_dim);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // PULSE - all LEDs on the same time fade up fade down
 void pulse() {
-
-  // dmx_master.setChannelValue(1, 0);
-  // dmx_master.setChannelValue(7, 0);
-  // dmx_master.setChannelValue(13, 0);
-  // dmx_master.setChannelValue(19, 0);
-  // dmx_master.setChannelValue(25, 0);
-  // dmx_master.setChannelValue(31, 0);
-  // dmx_master.setChannelValue(37, 0);
-  // dmx_master.setChannelValue(43, 0);
 
   if (loop_step < loop_time) {
     loop_step += step * 10;
@@ -46,15 +30,7 @@ void pulse() {
       dim = -dim;
     }
 
-
-    dmx_master.setChannelValue(1, brightness);
-    dmx_master.setChannelValue(7, brightness);
-    dmx_master.setChannelValue(13, brightness);
-    dmx_master.setChannelValue(19, brightness);
-    dmx_master.setChannelValue(25, brightness);
-    dmx_master.setChannelValue(31, brightness);
-    dmx_master.setChannelValue(37, brightness);
-    dmx_master.setChannelValue(43, brightness);
+    setRoof(brightness, 0, 0);
   }
 }
 
@@ -69,14 +45,7 @@ void strobe() {
   if (loop_step < loop_time) {
     loop_step += step * 10;
 
-    dmx_master.setChannelValue(1, dim);
-    dmx_master.setChannelValue(7, dim);
-    dmx_master.setChannelValue(13, dim);
-    dmx_master.setChannelValue(19, dim);
-    dmx_master.setChannelValue(25, dim);
-    dmx_master.setChannelValue(31, dim);
-    dmx_master.setChannelValue(37, dim);
-    dmx_master.setChannelValue(43, dim);
+    setRoof(dim, 0, 0);
   }
 
   if (loop_step < loop_time) {
@@ -143,21 +112,7 @@ void dimmAll() {
       fadeAmount = 0;
     }
 
-    dmx_master.setChannelValue(1, brightness);
-
-    dmx_master.setChannelValue(7, brightness);
-
-    dmx_master.setChannelValue(13, brightness);
-
-    dmx_master.setChannelValue(19, brightness);
-
-    dmx_master.setChannelValue(25, brightness);
-
-    dmx_master.setChannelValue(31, brightness);
-
-    dmx_master.setChannelValue(37, brightness);
-
-    dmx_master.setChannelValue(43, brightness);
+    setRoof(brightness, 0, 0);
 }
 
 

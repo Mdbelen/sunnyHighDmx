@@ -2,6 +2,8 @@
 #include <SoftwareSerial.h>
 //#include "FastLED.h"
 
+//#define DEBUGEN 1
+
 #define DMX_MASTER_CHANNELS 100
 #define RXEN_PIN 2
 DMX_Master dmx_master(DMX_MASTER_CHANNELS, RXEN_PIN);
@@ -12,6 +14,8 @@ DMX_Master dmx_master(DMX_MASTER_CHANNELS, RXEN_PIN);
 
 #define FPS 60 // Animation frames/second (ish)
 
+#define MILLIS16 ((uint16_t)(millis()))
+
 uint8_t fogLvl = 0;
 // save time of last fog activation
 uint16_t fogLvl_lastAct = 0;
@@ -20,9 +24,14 @@ unsigned long mainLightData[100][4];
 
 SoftwareSerial ser(RX_PIN, TXO_PIN);
 
+
+uint8_t g_color[3] = {255, 0, 0};
+// global dim variable. g_color will be right-shifted by this amount of bits (div 2^g_dim)
+uint8_t g_dim = 0;
+
 //////////////////////FUNCTION FOR DELAYLESS TIMING
 int brightness = 10;
-int dim = 10;
+int dim = 10; // rollovar: will be modified by wipes
 int fadeAmount = 5;
 uint8_t g_fast = 10;
 unsigned step = 5;  // interval at which to blink (milliseconds)
@@ -33,7 +42,14 @@ void setup() {
   ser.begin(9600);
   dmx_master.enable();
   dmx_master.setChannelRange(1, 100, 0);
+#ifdef DEBUGEN
+  pinMode(13, OUTPUT);  // debug LED
 
+  // set marker for python script to detect DMX frame boundaries
+  dmx_master.setChannelValue(80, 127);
+  dmx_master.setChannelValue(81, 127);
+  dmx_master.setChannelValue(82, 255);
+#endif
 }
 
 //ledhinten addr 68
@@ -129,25 +145,29 @@ void setRoof(uint8_t red, uint8_t grn, uint8_t blu, uint8_t a1, uint8_t a2, uint
 
 uint8_t buf[3],          // Enough for RGB parse; expand if using sensors
   animMode = 1;          // Current animation mode
-uint32_t prevTime = 0L;  // For animation timing
 
-uint8_t redd = 255, green = 0, blue = 0;
 
 void loop(void) {
   int c;
-  uint32_t t;
+  // for animation timing
+  uint16_t tnow;
+  static uint16_t tprev;
+
+#ifdef DEBUGEN
+  digitalWrite(13, fogLvl ? HIGH : LOW);
+#endif
 
   // fogger auto-off so that nobody can forget it-,-
-  if( fogLvl && (((uint16_t)(millis()) - fogLvl_lastAct) > 15000) ) {
+  if( fogLvl && ((MILLIS16 - fogLvl_lastAct) > 15000) ) {
     fogLvl = 0;
     dmx_master.setChannelValue(64, 0);
   }
 
   digitalWrite(CTS_PIN, LOW);  // Signal to BLE, OK to send data!
   for (;;) {
-    t = micros();                              // Current time
-    if ((t - prevTime) >= (1000000L / FPS)) {  // 1/30 sec elapsed?
-      prevTime = t;
+    tnow = MILLIS16;                              // Current time
+    if ((tnow - tprev) >= (1000 / FPS)) {  // 1/FPS sec elapsed?
+      tprev = tnow;
       break;                        // Yes, go update LEDs
     }                               // otherwise...
     if ((c = ser.read()) == '!') {  // Received UART app input?
@@ -161,9 +181,9 @@ void loop(void) {
           break;
         case 'C':  // Color Picker
           if (readAndCheckCRC(255 - '!' - 'C', buf, 3)) {
-            redd = buf[0];
-            green = buf[1];
-            blue = buf[2];
+            g_color[0] = buf[0];
+            g_color[1] = buf[1];
+            g_color[2] = buf[2];
           }
           break;
       }
@@ -243,17 +263,23 @@ void buttonPress(char c) {
       if (dim > 5) {
         dim -= 5;
       }
+      if(g_dim < 6) {
+        g_dim += 1;
+      }
       break;
     case '4':
       if (dim < 150) {
         dim += 5;
+      }
+      if(g_dim > 0) {
+        g_dim -= 1;
       }
       break;
     case '5': //arrowLTop
       if (step < 24) {
         step++;
       }
-    if (g_fast < 24) {
+      if (g_fast < 24) {
         g_fast++;
       }
       break;
