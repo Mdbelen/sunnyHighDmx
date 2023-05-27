@@ -12,6 +12,10 @@ DMX_Master dmx_master(DMX_MASTER_CHANNELS, RXEN_PIN);
 
 #define FPS 60 // Animation frames/second (ish)
 
+uint8_t fogLvl = 0;
+// save time of last fog activation
+uint16_t fogLvl_lastAct = 0;
+
 unsigned long mainLightData[100][4];
 
 SoftwareSerial ser(RX_PIN, TXO_PIN);
@@ -133,6 +137,12 @@ void loop(void) {
   int c;
   uint32_t t;
 
+  // fogger auto-off so that nobody can forget it-,-
+  if( fogLvl && (((uint16_t)(millis()) - fogLvl_lastAct) > 15000) ) {
+    fogLvl = 0;
+    dmx_master.setChannelValue(64, 0);
+  }
+
   digitalWrite(CTS_PIN, LOW);  // Signal to BLE, OK to send data!
   for (;;) {
     t = micros();                              // Current time
@@ -214,11 +224,13 @@ void skipBytes(uint8_t n) {
 }
 
 void buttonPress(char c) {
-  static uint8_t fogLvl = 0;
   switch (c) {
     case '1':
       fogLvl = fogLvl==192 ? 255 : (fogLvl==255 ? 0 : fogLvl+64);
       dmx_master.setChannelValue(64, fogLvl);
+      if(fogLvl > 0) {
+        fogLvl_lastAct = millis();
+      }
       //animMode = 4;
       //dim = 255;
       //step = 1;
